@@ -1,4 +1,5 @@
-- name: restart kesl # перезапуск агента администрирования
+- name: restart kesl 
+  become: yes
   service:
     name: "kesl"
     state: restarted

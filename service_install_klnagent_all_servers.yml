@@ -1,5 +1,0 @@
-- name: "Installing Kaspersky agent"
-  hosts: "all"
-  gather_facts: yes
-  roles:
-    - klnagent

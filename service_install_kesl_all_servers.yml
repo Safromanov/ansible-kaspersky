@@ -1,5 +1,0 @@
-- name: "Installing Kaspersky Endpoint Security"
-  hosts: "all"
-  gather_facts: yes
-  roles:
-    - kesl

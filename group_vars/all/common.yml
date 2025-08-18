@@ -1,6 +1,3 @@
 
-local_distr_repo_url: "http://10.10.10.10:8099"
+local_distr_repo_url: "files/kaspersky/kesl_12.2.0-2412_amd64.deb"
 
-#Vault secret:123456
-# local_distr_repo_user: "username"
-# local_distr_repo_pass: "password"
