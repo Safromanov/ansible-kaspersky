@@ -1,5 +1,6 @@
+---
 - name: "Installing Kaspersky agent"
-  hosts: "{{ host }}"
+  hosts: all
   gather_facts: yes
   roles:
     - klnagent

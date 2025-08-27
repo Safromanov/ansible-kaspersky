@@ -8,7 +8,7 @@
     tags: kesl
 
   - name: "Creating answer file for kesl"
-    become: yes
+    # become: yes
     template:
       src: "kesl.j2"
       dest: "/tmp/kesl.ini"
@@ -16,20 +16,20 @@
     tags: kesl
 
   - name: "Installing package"
-    become: yes
+    become: true
     apt:
       deb: "/tmp/{{ kesl_file_name }}"
       state: present
     tags: kesl
 
   - name: "Kesl postinstall config"
-    become: yes
+    become: true
     shell: "{{ default_kesl_bin_path }}/kesl-setup.pl --autoinstall=/tmp/kesl.ini"
-    register: postconfig_result
+    register: postconfig_result    
     notify:  restart kesl
 
   - name: "Ensure kesl service is enabled"
-    become: yes
+    become: true
     service:
       name: kesl
       enabled: yes
@@ -46,7 +46,7 @@
   #   notify:  restart kesl
 
   - name: "Removing temporary files"
-    become: yes
+    # become: yes
     file: 
       path: "{{ item }}" 
       state: absent

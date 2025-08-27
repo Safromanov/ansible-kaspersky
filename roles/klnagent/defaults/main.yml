@@ -1,7 +1,7 @@
 default_klnagent_bin_path: "/opt/kaspersky/klnagent64/lib/bin"
 
 # -----используется в случае tasks.yml-> main.yml -> metod_klnagent: "autonomous_package"--------
-# klnagent_autonomous_package_name: "klnagent64-11.0.0-38.x86_64.sh" 
+# klnagent_package_name: "klnagent64-11.0.0-38.x86_64.sh" 
 # -----------------------------------------------------------------------------------------------
 
 # -----используется в случае tasks.yml-> main.yml -> metod_klnagent: "custom_install"------------

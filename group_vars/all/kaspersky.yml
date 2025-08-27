@@ -2,7 +2,7 @@
 metod_klnagent_param: "custom_install" # autonomous_package или custom_install
 
 # -----используется в случае metod_klnagent_param: "autonomous_package"--------
-klnagent_autonomous_package_name: "klnagent64-11.0.0-38.x86_64.sh" 
+klnagent_package_name: "klnagent64_15.4.0-8952_arm64.deb" 
 
 # -----используется в случае metod_klnagent_param: "custom_install"------------
 klnagent_url: "https://products.s.kaspersky-labs.com/endpoints/keslinux10/11.1.0.3013/multilanguage-INT-11.1.0.3013/3330333430347c44454c7c31/klnagent64-11.0.0-38.x86_64.rpm"
@@ -26,5 +26,4 @@ GROUP_CLEAN: "no"
 USE_GUI: "no"
 INSTALL_LICENSE: ""
 ScanMemoryLimit: "2048"
-GROUP_CLEAN: "no"
 UPDATE_EXECUTE: "no"

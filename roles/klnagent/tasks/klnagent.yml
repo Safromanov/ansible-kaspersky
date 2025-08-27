@@ -1,60 +1,81 @@
+# ПРОВЕРКА НА НАЧИЛИЕ АГЕНТА
 - block:
-    - name: "Getting klnagent autonomous install package to temporary folder"
-      get_url:
-        url: "{{ local_distr_repo_url }}/{{ klnagent_autonomous_package_name }}"
-        dest: "/tmp/{{ klnagent_autonomous_package_name }}"
-        url_username: "{{ local_distr_repo_user }}"
-        url_password: "{{ local_distr_repo_pass }}"
+    - name: "Check if klnagent64 binary exists"
+      become: true
+      ansible.builtin.stat:
+        path: /usr/bin/klnagent64
+      register: klnagent64_bin_check
+      tags: klnagent
+
+    - name: "Check if klnagent config directory exists"
+      become: true
+      ansible.builtin.stat:
+        path: /etc/opt/kaspersky/klnagent
+      register: klnagent_config_check
+      tags: klnagent
+
+    - name: "Fail if klnagent is already installed"
+      fail:
+        msg: >
+          klnagent is already installed on this system. 
+          Please uninstall it manually first or add 'force_reinstall: true' to variables.
+      when: 
+        - (klnagent_bin_check.stat.exists or klnagent64_bin_check.stat.exists or klnagent_config_check.stat.exists)
+        - not force_reinstall | default(false) | bool
+      tags: klnagent
+
+#     - name: "Check if klnagent packages are installed" # <-- If version ansible < 2.9
+#       become: true
+#       shell:
+#         cmd: "dpkg -l | 
+#               grep -E '^(ii|hi)' | 
+#               grep -E '(klnagent|klnagent64)' | 
+#               awk '{print $2}'"
+#       register: klnagent_installed_check
+#       changed_when: false
+#       tags: klnagent
+
+#     - name: "Fail if klnagent is already installed"
+#       fail:
+#         msg: >
+#           klnagent package is already installed (found: {{ klnagent_installed_check.stdout }}). 
+#           Please uninstall it manually first or add 'force_reinstall: true' to variables.
+#       when: 
+#         - klnagent_installed_check.stdout != ""
+#         - not force_reinstall | default(false) | bool
+#       tags: klnagent
+
+
+# ЗАГРУЗКА ДИСТРИБУТИВА АГЕНТА НА УПРАВЛЯЕМУЮ  МАШИНУ    
+- block:
+    - name: "Downloading deb package"
+      copy:
+        src: "{{ klnagent_package_name }}"
+        dest: "/tmp/{{ klnagent_package_name }}"
         mode: 0755
+        remote_src: false
       tags: klnagent
 
-    - name: "Running klnagent autonomous install"
-      become: yes
-      shell: "/tmp/{{ klnagent_autonomous_package_name }}"
-      args:
-        executable: /bin/bash 
-      tags: klnagent
-
-    - name: "Ensure klnagent service is enabled"
-      become: yes
-      service:
-        name: klnagent64
-        enabled: yes
-        state: started
-      tags: klnagent
-
-    - name: "Removing package file"
-      file: 
-        path: "/tmp/{{ klnagent_autonomous_package_name }}" 
-        state: absent
-  when: metod_klnagent == "autonomous_package"
-
+# УСТАНОВКА И НАСТРОЙКА АГЕНТА
 - block:
     - name: "Creating answer file for klnagent"
-      become: yes
       template:
         src: klnagent.j2
         dest: /tmp/klnagent.ini
         mode: 0644
       tags: klnagent
 
-    - name: "Downloading rpm package"
-      become: yes
-      get_url:
-        url: "{{ klnagent_url }}"
-        dest: /tmp/{{ klnagent_url.split("/")[-1] }}
-      tags: klnagent
-
     - name: "Installing package"
-      become: yes
-      yum:
-        name: /tmp/{{ klnagent_url.split("/")[-1] }}
+      become: true
+      apt:
+        deb: "/tmp/{{ klnagent_package_name }}"
         state: present
       tags: klnagent
 
     - name: "Run configuring klnagent"
-      become: yes
+      become: true
       shell: "{{ default_klnagent_bin_path }}/setup/postinstall.pl"
+      ignore_errors: true # <-- Игнорирует любую ошибку в этой задаче. Только для проверки в  тестовой среде
       args:
         executable: /bin/bash 
       environment: 
@@ -62,20 +83,12 @@
       notify: restart klnagent
       tags: klnagent
 
-    - name: "Ensure klnagent service is enabled"
-      become: yes
-      service:
-        name: klnagent64
-        enabled: yes
-        state: started
-      tags: klnagent
-
     - name: "Removing temporary files"
       file: 
         path: "{{ item }}" 
         state: absent
       with_items:
-        - "/tmp/{{ klnagent_url.split(\"/\")[-1] }}"
+        - "/tmp/{{ klnagent_package_name }}"
         - "/tmp/klnagent.ini"
   when: metod_klnagent == "custom_install"
 
